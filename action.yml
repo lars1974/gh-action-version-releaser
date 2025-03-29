@@ -9,6 +9,10 @@ branding:
 
 # Define your inputs here.
 inputs:
+  tag-strategy:
+    description: 'semantic, counter, timestamp'
+    required: true
+    default: 'semantic'
   milliseconds:
     description: Your input description here
     required: true

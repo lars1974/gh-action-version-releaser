@@ -31,7 +31,8 @@ export async function getLatestTag(): Promise<string> {
     })
 
     if (response.data.length === 0) {
-      throw new Error('No tags found in the repository.')
+      createTag('v0.0.0')
+      return 'v0.0.0' // Opretter et tag hvis der ikke er nogen
     }
 
     return response.data[0].name // Returnerer det nyeste tag
