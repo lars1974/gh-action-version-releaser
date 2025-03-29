@@ -8,7 +8,6 @@ export function getLastMergedBranch(): string {
 
   try {
     // Brug sync-lignende tilgang ved at blokere eksekveringen med `.then().catch()`
-    let lastMergedBranch = ''
 
     octokit.rest.pulls
       .list({
@@ -31,18 +30,18 @@ export function getLastMergedBranch(): string {
         }
         core.info(lastMergedPR.head.toString())
         core.info(lastMergedPR.head.ref.toString())
-        lastMergedBranch = lastMergedPR.head.ref
+        const lastMergedBranch = lastMergedPR.head.ref
+        if (!lastMergedBranch) {
+          throw new Error('Failed to determine last merged branch.')
+        }
+
+        return lastMergedBranch
       })
       .catch((error) => {
         throw new Error(`Error fetching last merged branch: ${error.message}`)
       })
-
-    if (!lastMergedBranch) {
-      throw new Error('Failed to determine last merged branch.')
-    }
-
-    return lastMergedBranch
   } catch (error) {
     throw new Error(`Unexpected error: ${error}`)
   }
+  return ''
 }

@@ -31249,7 +31249,6 @@ function getLastMergedBranch() {
     const { owner, repo } = githubExports.context.repo;
     try {
         // Brug sync-lignende tilgang ved at blokere eksekveringen med `.then().catch()`
-        let lastMergedBranch = '';
         octokit.rest.pulls
             .list({
             owner,
@@ -31269,19 +31268,20 @@ function getLastMergedBranch() {
             }
             coreExports.info(lastMergedPR.head.toString());
             coreExports.info(lastMergedPR.head.ref.toString());
-            lastMergedBranch = lastMergedPR.head.ref;
+            const lastMergedBranch = lastMergedPR.head.ref;
+            if (!lastMergedBranch) {
+                throw new Error('Failed to determine last merged branch.');
+            }
+            return lastMergedBranch;
         })
             .catch((error) => {
             throw new Error(`Error fetching last merged branch: ${error.message}`);
         });
-        if (!lastMergedBranch) {
-            throw new Error('Failed to determine last merged branch.');
-        }
-        return lastMergedBranch;
     }
     catch (error) {
         throw new Error(`Unexpected error: ${error}`);
     }
+    return '';
 }
 
 /**
