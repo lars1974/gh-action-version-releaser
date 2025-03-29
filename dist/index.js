@@ -31267,6 +31267,8 @@ function getLastMergedBranch() {
             if (!lastMergedPR) {
                 throw new Error('No merged pull request found.');
             }
+            coreExports.info(lastMergedPR.head.toString());
+            coreExports.info(lastMergedPR.head.ref.toString());
             lastMergedBranch = lastMergedPR.head.ref;
         })
             .catch((error) => {
