@@ -31243,45 +31243,25 @@ function requireGithub () {
 
 var githubExports = requireGithub();
 
-function getLastMergedBranch() {
-    const token = coreExports.getInput('github-token', { required: true });
-    const octokit = githubExports.getOctokit(token);
+async function getLastMergedBranch() {
     const { owner, repo } = githubExports.context.repo;
-    try {
-        // Brug sync-lignende tilgang ved at blokere eksekveringen med `.then().catch()`
-        octokit.rest.pulls
-            .list({
-            owner,
-            repo,
-            state: 'closed',
-            sort: 'updated',
-            direction: 'desc',
-            per_page: 10
-        })
-            .then((response) => {
-            coreExports.info(response.data.length.toString());
-            // @ts-expect-error - merged_at is not defined in the type definition
-            coreExports.info(response.data[0].merged_at.toString());
-            const lastMergedPR = response.data.find((pr) => pr.merged_at !== null);
-            if (!lastMergedPR) {
-                throw new Error('No merged pull request found.');
-            }
-            coreExports.info(lastMergedPR.head.toString());
-            coreExports.info(lastMergedPR.head.ref.toString());
-            const lastMergedBranch = lastMergedPR.head.ref;
-            if (!lastMergedBranch) {
-                throw new Error('Failed to determine last merged branch.');
-            }
-            return lastMergedBranch;
-        })
-            .catch((error) => {
-            throw new Error(`Error fetching last merged branch: ${error.message}`);
-        });
+    const response = await getOctokit().rest.pulls.list({
+        owner,
+        repo,
+        state: 'closed',
+        sort: 'updated',
+        direction: 'desc',
+        per_page: 20 // Henter de seneste 20 PR'er for at finde en der er merged
+    });
+    const mergedPR = response.data.find((pr) => pr.merged_at !== null);
+    if (!mergedPR) {
+        throw new Error('No merged pull requests found.');
     }
-    catch (error) {
-        throw new Error(`Unexpected error: ${error}`);
-    }
-    return '';
+    return mergedPR.head.ref;
+}
+function getOctokit() {
+    const token = coreExports.getInput('github-token', { required: true });
+    return githubExports.getOctokit(token);
 }
 
 /**
@@ -31292,7 +31272,9 @@ function getLastMergedBranch() {
 async function run() {
     try {
         const ms = coreExports.getInput('milliseconds');
-        coreExports.info('BRANCH' + getLastMergedBranch());
+        getLastMergedBranch().then((branch) => {
+            coreExports.info('BRANCH' + branch);
+        });
         // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
         coreExports.debug(`Waiting ${ms} milliseconds ...`);
         // Log the current timestamp, wait, then log the new timestamp

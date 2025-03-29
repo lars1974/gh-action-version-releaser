@@ -1,47 +1,26 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 
-export function getLastMergedBranch(): string {
-  const token = core.getInput('github-token', { required: true })
-  const octokit = github.getOctokit(token)
+export async function getLastMergedBranch(): Promise<string> {
   const { owner, repo } = github.context.repo
 
-  try {
-    // Brug sync-lignende tilgang ved at blokere eksekveringen med `.then().catch()`
+  const response = await getOctokit().rest.pulls.list({
+    owner,
+    repo,
+    state: 'closed',
+    sort: 'updated',
+    direction: 'desc',
+    per_page: 20 // Henter de seneste 20 PR'er for at finde en der er merged
+  })
 
-    octokit.rest.pulls
-      .list({
-        owner,
-        repo,
-        state: 'closed',
-        sort: 'updated',
-        direction: 'desc',
-        per_page: 10
-      })
-      .then((response) => {
-        core.info(response.data.length.toString())
-        // @ts-expect-error - merged_at is not defined in the type definition
-        core.info(response.data[0].merged_at.toString())
-
-        const lastMergedPR = response.data.find((pr) => pr.merged_at !== null)
-
-        if (!lastMergedPR) {
-          throw new Error('No merged pull request found.')
-        }
-        core.info(lastMergedPR.head.toString())
-        core.info(lastMergedPR.head.ref.toString())
-        const lastMergedBranch = lastMergedPR.head.ref
-        if (!lastMergedBranch) {
-          throw new Error('Failed to determine last merged branch.')
-        }
-
-        return lastMergedBranch
-      })
-      .catch((error) => {
-        throw new Error(`Error fetching last merged branch: ${error.message}`)
-      })
-  } catch (error) {
-    throw new Error(`Unexpected error: ${error}`)
+  const mergedPR = response.data.find((pr) => pr.merged_at !== null)
+  if (!mergedPR) {
+    throw new Error('No merged pull requests found.')
   }
-  return ''
+  return mergedPR.head.ref
+}
+
+function getOctokit() {
+  const token = core.getInput('github-token', { required: true })
+  return github.getOctokit(token)
 }
