@@ -31261,6 +31261,8 @@ function getLastMergedBranch() {
         })
             .then((response) => {
             coreExports.info(response.data.length.toString());
+            // @ts-expect-error - merged_at is not defined in the type definition
+            coreExports.info(response.data[0].merged_at.toString());
             const lastMergedPR = response.data.find((pr) => pr.merged_at !== null);
             if (!lastMergedPR) {
                 throw new Error('No merged pull request found.');
