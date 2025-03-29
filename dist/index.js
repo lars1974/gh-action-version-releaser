@@ -31259,6 +31259,23 @@ async function getLastMergedBranch() {
     }
     return mergedPR.head.ref;
 }
+async function getLatestTag() {
+    try {
+        const { owner, repo } = githubExports.context.repo;
+        const response = await getOctokit().rest.repos.listTags({
+            owner,
+            repo,
+            per_page: 1 // Vi behøver kun det nyeste tag
+        });
+        if (response.data.length === 0) {
+            throw new Error('No tags found in the repository.');
+        }
+        return response.data[0].name; // Returnerer det nyeste tag
+    }
+    catch (error) {
+        throw new Error(`Error fetching latest tag: ${error instanceof Error ? error.message : String(error)}`);
+    }
+}
 function getOctokit() {
     const token = coreExports.getInput('github-token', { required: true });
     return githubExports.getOctokit(token);
@@ -31274,6 +31291,9 @@ async function run() {
         const ms = coreExports.getInput('milliseconds');
         getLastMergedBranch().then((branch) => {
             coreExports.info('BRANCH' + branch);
+        });
+        getLatestTag().then((tag) => {
+            coreExports.info('TAG' + tag);
         });
         // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
         coreExports.debug(`Waiting ${ms} milliseconds ...`);

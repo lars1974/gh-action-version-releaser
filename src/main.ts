@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
 import { wait } from './wait.js'
-import { getLastMergedBranch } from './github.js'
+import { getLastMergedBranch, getLatestTag } from './github.js'
 
 /**
  * The main function for the action.
@@ -13,6 +13,10 @@ export async function run(): Promise<void> {
 
     getLastMergedBranch().then((branch) => {
       core.info('BRANCH' + branch)
+    })
+
+    getLatestTag().then((tag) => {
+      core.info('TAG' + tag)
     })
     // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
     core.debug(`Waiting ${ms} milliseconds ...`)
