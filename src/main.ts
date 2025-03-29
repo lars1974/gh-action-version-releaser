@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import { wait } from './wait.js'
+import { getLastMergedBranch } from './github.js'
 
 /**
  * The main function for the action.
@@ -10,6 +11,7 @@ export async function run(): Promise<void> {
   try {
     const ms: string = core.getInput('milliseconds')
 
+    core.info('BRANCH' + getLastMergedBranch())
     // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
     core.debug(`Waiting ${ms} milliseconds ...`)
 
