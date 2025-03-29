@@ -14,7 +14,7 @@ inputs:
     required: true
     default: '1000'
   github-token:
-    description: "GitHub Token for API-kald"
+    description: 'GitHub Token for API-kald'
     required: true
 
 # Define your outputs here.
