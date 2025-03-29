@@ -31260,6 +31260,7 @@ function getLastMergedBranch() {
             per_page: 10
         })
             .then((response) => {
+            coreExports.info(response.data.length.toString());
             const lastMergedPR = response.data.find((pr) => pr.merged_at !== null);
             if (!lastMergedPR) {
                 throw new Error('No merged pull request found.');
