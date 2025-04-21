@@ -9,10 +9,23 @@ branding:
 
 # Define your inputs here.
 inputs:
-  tag-strategy:
-    description: 'semantic, counter, timestamp'
+  version-strategy:
+    description: 'semver, counter, timestamp'
     required: true
     default: 'semantic'
+  semver-release-input:
+    description: 'releaseNotes, lastCommit, pullRequest', 'branchName'
+    required: false
+    default: 'releaseNotes'
+  semver-file-name:
+    description: 'file name'
+    required: false
+    default: 'release-notes.md'
+  semver-major-pattern:
+    description: 'major pattern'
+    required: false
+    default: '## Major'
+
   milliseconds:
     description: Your input description here
     required: true

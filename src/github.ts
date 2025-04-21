@@ -43,6 +43,8 @@ export async function getLatestTag(): Promise<string> {
   }
 }
 
+
+
 export async function createTag(tagName: string): Promise<void> {
   const { owner, repo } = github.context.repo
 
